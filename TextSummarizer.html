@@ -1,0 +1,252 @@
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Abstractive Text Summarizer</title>
+    <link rel="stylesheet" href="css/foundation.css" />
+	<link rel="stylesheet" href="icons/foundation-icons.css" />
+	<style>
+		#title
+		{
+			color:#FFFFFF;
+		}
+		#bckg1
+		{
+			background-image: url("imgs/bck8.jpg");
+			opacity: 0.4;
+			filter: alpha(opacity=40);
+			height:100%;
+			width:100%;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			background-size: 100%;
+		}
+		/* Start by setting display:none to make this hidden.
+		   Then we position it in relation to the viewport window
+		   with position:fixed. Width, height, top and left speak
+		   for themselves. Background we set to 80% white with
+		   our animation centered, and no-repeating */
+		.loadingModal {
+			display:    none;
+			position:   fixed;
+			z-index:    1000;
+			top:        0;
+			left:       0;
+			height:     100%;
+			width:      100%;
+			background: rgba( 255, 255, 255, .8 ) 
+						url('imgs/FhHRx.gif') 
+						50% 50% 
+						no-repeat;
+		}
+
+		/* When the body has the loading class, we turn
+		   the scrollbar off with overflow:hidden */
+		body.loading {
+			overflow: hidden;   
+		}
+
+		/* Anytime the body has the loading class, our
+		   modal element will be visible */
+		body.loading .loadingModal {
+			display: block;
+		}
+	</style>
+    <script src="js/vendor/modernizr.js"></script>
+	<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>-->
+	<script src="jquery-1.11.1.js"></script>
+	<script src="js/vendor/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script>
+	
+		$(document).ready(function(e){
+			$(document).foundation();
+			
+		});
+		
+		$body = $("body");
+		run = 0;
+
+		$(document).on({
+			ajaxStart: function() { $body.addClass("loading");    },
+			 ajaxStop: function() { $body.removeClass("loading"); }    
+		});
+
+		
+		function getRadioVal(form, name) {
+			var val;
+			// get list of radio buttons with specified name
+			var radios = form.elements[name];
+			for (var i=0, len=radios.length; i<len; i++) {
+				if ( radios[i].checked ) { 
+					val = radios[i].value; 
+					break;
+				}
+			}
+			return val; 
+		}
+		
+		function displaySummary(data)
+		{
+			id=1;
+			summ_list = data["root"];
+			console.log(summ_list);
+			if (run!=0)
+				removeElement(".accordion");
+			$(".accordion").append("<br><center><h3><b>*** News Summary ***</b></h3></center><br>");
+			for(id=1;id<summ_list.length; id++)
+			{
+				keys = summ_list[id]["key"];
+				console.log(keys);
+				keyphrases = "Tags  : " +keys.join();
+				summary = summ_list[id]["summary"];
+				if (id==1)
+				class1 = "content active";
+				else
+				class1= "content";
+				$(".accordion").append('<dd class="accordion-navigation"><a href="#panel'+id+'"><b>'+keyphrases+'</b></a><div id="panel'+id+'" class="'+class1+'">'+summary+'</div></dd><br>');
+				//id++;
+				
+			}
+			run++;
+			
+		}
+		
+		function removeElement(divclass) 
+		{
+		  /*var d = document.getElementById('myDiv');
+		  var olddiv = document.getElementById(divNum);
+		  d.removeChild(olddiv);*/
+		  $(divclass).empty();
+		}
+		
+		function showSummary(e)
+		{
+			form = document.getElementById("algoselect");
+			var val = getRadioVal(form, 'algorithm');
+			// display value obtained
+			alert(val);
+			formURL = "/getsummary?algorithm="+val;
+			//query = "algorithm="+val;
+			$.ajax(
+			{
+				url : formURL,
+				type: "GET",
+				success:function(data, textStatus, jqXHR) 
+				{
+					//data: return data from server
+					console.log("success");
+					displaySummary(data);
+				},
+				error: function(jqXHR, textStatus, errorThrown) 
+				{
+					console.log("error");
+					//if fails      
+				}
+			});
+		}
+		
+		
+	</script>
+  </head>
+  <body>
+	<div id="bckg"></div>
+	<div class="fixed sticky">
+		<nav class="top-bar" data-topbar role="navigation" data-options="sticky_on: large">
+			<ul><li>	<h1 id="title">Business News</h1></li><ul>
+		</nav>
+	</div>
+	
+	<ul class="tabs vertical" data-tab>
+	  <li class="tab-title active"><a href="#panel1a"><b>Home</b></a></li>
+	  <li class="tab-title"><a href="#panel2a"><b>About Us</b></a></li>
+	  <li class="tab-title"><a href="#panel3a"><b>Deep Learning</b></a></li>
+	  <li class="tab-title"><a href="#panel4a"><b>Support Vector for Clustering</b></a></li>
+	</ul>
+	
+	<div class="tabs-content vertical">
+	  <div class="content active" id="panel1a">
+	  <div class = "panel">
+		<p><b>Text summarization</b> is the process of extracting salient information from the source text and to present that information to the user in the form of summary. <b>Multi-document summarization</b>, a form of Text Summarization is an automatic procedure aimed at extraction of information from large cluster of documents about the same topic and generating a concise summary.</p>
+		
+		<form id="algoselect">
+			<fieldset>
+				<legend>Summarizer Algorithm</legend>
+			<div class="row">
+				<div class="large-12 columns">
+				  <label><h4><b>Select the Algorithm</b></h4></label>
+				  <input type="radio" name="algorithm" value="deeplearning" id="deeplearning" checked><label for="deeplearning"><h5>Deep Learning</h5></label>&nbsp &nbsp &nbsp
+				  <input type="radio" name="algorithm" value="svc" id="svc"><label for="svc"><h5>Support Vectors for Clustering</h5></label>&nbsp &nbsp &nbsp
+				  <input type="radio" name="algorithm" value="lexicalchains" id="lexicalchains"><label for="lexicalchains"><h5>Lexical Chains</h5></label>&nbsp &nbsp &nbsp
+				  <button class="button round" value="Summarize" onclick="showSummary() ; return false;" id="gensummary">Summarize</button>
+				</div>
+			</div>
+			
+			</fieldset>
+		</form>
+		</div>
+		<dl class="accordion" data-accordion id="accordions">
+		  <!--<dd class="accordion-navigation">
+			<a href="#panel1b">weakened immune systems, business experiences dramatic, hirai told reporters, personal computer business</a>
+			<div id="panel1b" class="content active">
+			  Sony also said it would not pay dividends for the first time since its shares started trading in Tokyo in 1958."Other firms are also offering new products with innovative technology -- this business experiences dramatic changes in products and services," Hirai told reporters in Tokyo when asked about struggles in the mobile phone unit.Demand for Sony's smartphones has come under increasing pressure from rivals including  Samsung and Apple, which is releasing its newest  iPhone in several key markets, including  Japan, this week."Market players are getting used to (Sony's downward revisions) but a temporary fall was still unavoidable," he said.The restructuring has included thousands of layoffs, exiting the personal computer business and liquidating assets that saw the $1.0 billion sale of its Manhattan headquarters.But it can be fatal to people with weakened immune systems, and lead to miscarriages among pregnant women.
+			</div>
+		  </dd>
+		  -->
+		</dl>
+		
+		</div>
+	  
+	  <div class="content" id="panel2a">
+	  <div class="panel">
+		<p>The project - <b>"Abstractive Multi-document Text Summarization"</b> was conceived and implemented by <b>Akshata Bhat</b> and <b>K R Anushree</b>, students pursuing final year in Bachelors of Engineering in Information Science Engineering, in the institution PES Institute of Technology. The project was carried out under the guidance of renowned professor of the Department of ISE - <b>Dr. S Natarajan</b> as a part of the curiculum for the final semester.</p>
+	  </div>
+	  </div>
+	  
+	  <div class="content" id="panel4a">
+		<div class="panel">
+		<center><h3><b>Support Vectors for Clustering</b></h3></center>
+		<p>
+		In the Support Vector Clustering (SVC) algorithm, data points are mapped from original data space to a high dimensional feature space using a Gaussian kernel. Using a nonlinear transformation Φ from χ to some high dimensional feature-space, we look for the smallest enclosing sphere of radius R, for the image of data. This is described by the constraints: <br>
+		<center><b>||Φ(xj ) − a||2 ≤ R2 ∀j</b></center><br>
+		This sphere is mapped back to data space, where it forms a set of contours which enclose the data points. These contours are interpreted as cluster boundaries. Points enclosed by each separate contour are associated with the same cluster. The shape of the enclosing contours in data space is governed by two parameters: q, the scale parameter of the Gaussian kernel, and C, the soft margin constant.<br>
+		<center><img src="imgs/svc2.png" alt="SVC"/></center>
+		</p>
+		<p>
+		Each sentence in our news article collections, to be summarized, is represented as feature vectors. The image of these feature vectors are transformed into higher dimension using gaussian kernel function. Also, a set of random data points which lie on same hyperplane as that of the original data is generated. The original data-points form one class - Class A, and the randomly generated data-points form the other class - Class B. SVM is applied to separate Class  A from Class B. In the process we obtain representative vectors, vectors which represent the clusters obtained for the data. These representative vectors are nothing but the non-bounded support vectors whose Lagrange’s multiplier is less than C (Gaussian Kernel). Then for each vector, we identify the cluster representative to which the it is closest and add it to the respective cluster. This algorithm is also known as Find and Join Clusters (FJC). The distance between vectors is computed using the cosine similarity.
+		</p>
+		<p>
+		Once clusters of sentences are obtained, we need to score the sentences, so that the most important sentence from each cluster can be selected to be part of the summary. We need a sentence scoring algorithm, where sentences are scored based on different features and weights corresponding to each feature. We then sort sentences based on score and choose the highest scored sentence. The brief outline of algorithm is depicted in the figure below.
+		<center><img src="imgs/svc1.png" alt="SVC"/></center>
+		</p>
+	    </div>
+	  </div>
+	  
+	  
+	  <div class="content" id="panel3a">
+	  <div class="panel">
+	  <center><h3><b>Deep Learning</b></h3></center>
+		<p>Deep Learning is about learning multiple levels of representation and abstraction that help to make sense of data such as images, sound, and text. The algorithm which we have implemented is Restricted Boltzmann Machine.
+Restricted Boltzmann Machine is a stochastic neural network. It is a network of neurons where each neuron has some random behavior when activated. It consists of one layer of visible units (neurons) and one layer   of   hidden   units.   Units   in   each   layer   have no connections between them and are connected to all other units   in   other   layer. Connections   between neurons are bidirectional and symmetric. This means that information  flows  in  both  directions  during  the  training and  during  the  usage  of  the  network  and  those  weights are the same in both directions.
+</p>
+<center><img src="imgs/dl1.png" alt="Deep Learning"/></center><br>
+<p>
+Initially,  the  network  is  trained  by  using  the data  set and  setting  the  neurons  on  visible  layer  to  match  data points in this data set. Once the  network  is  trained  it  can  be used  on  new unknown  data  to  make  classification of  the  data  (this  is known as unsupervised learning). For summarizing the text  there  is  a need  of  structuring  the  text  into  certain model which can be given to RBM as input. First of all the density of the document is reduced by using various preprocessing techniques and then it is converted into sentence matrix.
+</p>
+<center><img src="imgs/dl2.png" alt="Deep Learning"/></center><br>
+<p>
+The Gibbs chain is initialized with the hidden sample generated during the positive phase, therefore implementing Contrastive Divergence (CD). CD is a recipe used for training the undirected graph. It relies on an approximation of the gradient of the log-likelihood based on a short Markov chain started at the last example seen. One step of CD is performed to get the cost updates. We hence obtain a good set of feature functions. In second phase, obtained feature vectors are fined tuned by adjusting the weights of the units of the RBM. Back propagation algorithm is used to fine tune it. Once the RBM is trained, sampling is done. Samples of P(x) is obtained by running a Markov chain to convergence, using Gibbs sampling as the transition operator. Gibbs sampling of the joint of N random variables   is done through a sequence of N sampling sub-steps of the form   where   contains the   other random variables in   excluding  . The visible units are sampled simultaneously given fixed values of the hidden units. Similarly, hidden units are sampled simultaneously given the visible units. 
+</p>
+<center><img src="imgs/dl3.png" alt="Deep Learning"/></center><br>
+<p>
+The optimal feature vector set is generated by obtaining the sample at the end of the chain. Threshold values are set for the feature functions. These threshold values are obtained based on the experiments. The sentence with feature vector, that satisfies these threshold values, is selected.
+</p>
+	  </div>
+	  </div>
+	
+	</div>
+	
+	<br><br><br><br><br>
+	<div class="loadingModal"><!-- Place at bottom of page --></div>
+  </body>
+</html>
